@@ -2445,9 +2445,14 @@ class BasePipeline(object):
                 raise r
 
     def annotate_exception(self, exception, number, command):
-        cmd = unicode(' ').join(imap(unicode, command))
-        msg = unicode('Command # %d (%s) of pipeline caused error: %s') % (
-            number, cmd, unicode(exception.args[0]))
+        try:
+            cmd = unicode(' ').join(imap(unicode, command))
+            msg = unicode('Command # %d (%s) of pipeline caused error: %s') % (
+                number, cmd, unicode(exception.args[0]))
+        except UnicodeDecodeError, e:
+            cmd = ' '.join(imap(str, command))
+            msg = 'Command # %d (%s) of pipeline caused error: %s' % (
+                number, cmd, exception.args[0])
         exception.args = (msg,) + exception.args[1:]
 
     def parse_response(self, connection, command_name, **options):
